@@ -28,4 +28,9 @@ resource "azurerm_windows_function_app" "functionapp" {
     application_insights_key = var.appinsight_key
     elastic_instance_minimum = 1
   }
+  # below block enables identity on fucntion app means you can connect your function app through key vault.
+  # if you are enabling this, then you need to provide Key Vault Administrtor Role explicity to current user/service principle
+  identity {
+    type = "SystemAssigned"
+  }
 }
