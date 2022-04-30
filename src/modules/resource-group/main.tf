@@ -3,7 +3,7 @@
 ###########################
 
 resource "azurerm_resource_group" "rg" {
-  name      = "${var.environment}-rg-${var.locationname}-cp-${var.project}-resourcegrp"
+  name      = "${var.environment}-rg-${var.locationname}-${var.project}-resourcegrp"
   location  = var.location
   tags = var.tags
 }
