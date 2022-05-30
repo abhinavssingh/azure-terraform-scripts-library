@@ -12,7 +12,7 @@ Terraform script works in 5 steps:
 4. Apply : Apply your script. Creates resources.
 5. Destroy : Deletion of resources
 
-`
+```
 terraform {
   required_providers {
     azurerm = {
@@ -25,7 +25,8 @@ terraform {
 provider "azurerm" {
 
 }
-`
+
+```
 
 In above code snippet Terraform block is required in your first script because it invokes the required library from Hashicorp. Provider block sets global variable like Subscription and Service Principle.
 
