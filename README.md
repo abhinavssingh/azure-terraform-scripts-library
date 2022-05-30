@@ -27,6 +27,8 @@ provider "azurerm" {
 
 In above code snippet Terraform block is required in your first script because it invokes the required library from Hashicorp. Provider block sets global variable like Subscription and Service Principle.
 
+I have followed module approach to create azure resources for better flexibilty. You can read more [here](https://www.terraform.io/language/modules/develop).
+
 ## Resources
 1. [How to Get Started](https://learn.hashicorp.com/collections/terraform/azure-get-started)
 2. [What is Azure Provider?](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
