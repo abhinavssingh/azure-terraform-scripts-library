@@ -1,0 +1,36 @@
+trigger: none
+## update trigger as per per your requirement. Currently continuous integration is disabled.
+
+stages:
+  - stage: 'Build'
+    displayName: 'Package and Publish Terraform Files'
+    jobs:
+    - job: 'Publish'
+      displayName: 'Package and Publish job'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+          - task: CopyFiles@2
+            displayName: 'Copy Terraform files'
+            inputs:
+              SourceFolder: '.'
+              Contents: |
+                dev/**
+                modules/**
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'terraform'
+              publishLocation: 'Container'
+  - template: azure-deployment-template.yml
+    parameters:
+      dependsOn: "Build"
+      envname: "dev"
+      environment: "Development"
+      serviceprincipal: "<Enter Your Service Principal>"
+      terraformstoragerg: "<enter your storage account resource group>"
+      terraformstorageaccount: "<enter your storage account name>"
+      terraformkey: "<enter somestring>"
+
+## duplicate template section if you have to deploy in more than one environment.

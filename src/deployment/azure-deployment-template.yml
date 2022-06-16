@@ -1,0 +1,67 @@
+parameters:
+- name: "dependsOn"
+  type: string
+- name: "envname"
+  type: string
+- name: "environment"
+  type: string
+- name: "serviceprincipal"
+  type: string
+- name: "terraformstoragerg"
+  type: string
+- name: "terraformstorageaccount"
+  type: string
+- name: "terraformkey"
+  type: string
+
+stages:
+  - stage: ${{ parameters.environment }}
+    displayName: "Deploy ${{ parameters.envname }} Infrastructure"
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    variables:
+        terraformstoragerg: ${{ parameters.terraformstoragerg }}
+        terraformstorageaccount: ${{ parameters.terraformstorageaccount }}
+        terraformstoragecontainer: 'terraform'
+        terraformkey: '${{ parameters.terraformkey }}/${{ parameters.envname }}/terraform.tfstate'
+    jobs:
+    - deployment: ${{ parameters.environment }}
+      pool:
+        vmImage: 'ubuntu-latest'
+      environment: ${{ parameters.environment }}
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - download: current
+              artifact: terraform
+            - task: TerraformInstaller@0
+              inputs:
+                terraformVersion: '1.1.9'
+            - task: TerraformTaskV2@2
+              displayName: 'terraform init'
+              inputs:
+                provider: 'azurerm'
+                command: 'init'
+                workingDirectory: '$(Pipeline.Workspace)/terraform/${{ parameters.envname }}'
+                backendServiceArm: ${{ parameters.serviceprincipal }}
+                backendAzureRmResourceGroupName: $(terraformstoragerg)
+                backendAzureRmStorageAccountName: $(terraformstorageaccount)
+                backendAzureRmContainerName: $(terraformstoragecontainer)
+                backendAzureRmKey: $(terraformkey)
+            - task: TerraformTaskV2@2
+              displayName: 'terraform plan'
+              inputs:
+                provider: 'azurerm'
+                command: 'plan'
+                commandOptions: '-out=tfapply'
+                workingDirectory: '$(Pipeline.Workspace)/terraform/${{ parameters.envname }}'
+                environmentServiceNameAzureRM: ${{ parameters.serviceprincipal }}
+            - task: TerraformTaskV2@2
+              displayName: 'terraform apply'
+              inputs:
+                provider: 'azurerm'
+                command: 'apply'
+                workingDirectory: '$(Pipeline.Workspace)/terraform/${{ parameters.envname }}'
+                commandOptions: '-auto-approve tfapply '
+                environmentServiceNameAzureRM: ${{ parameters.serviceprincipal }}
